@@ -27,7 +27,7 @@ class QuerydslApplicationTests {
 		em.persist(hello);
 
 		JPAQueryFactory query = new JPAQueryFactory(em);
-		QHello qhello = new QHello("h");
+		QHello qhello = QHello.hello;
 
 		Hello result = query
 				.selectFrom(qhello)
