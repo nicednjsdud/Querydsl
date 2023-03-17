@@ -15,6 +15,8 @@ import study.querydsl.entity.QTeam;
 import study.querydsl.entity.Team;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
 
 import java.util.List;
 
@@ -275,8 +277,40 @@ public class QuerydslBasicTest {
                 .from(member)
                 .leftJoin(team).on(member.userName.eq(team.name))
                 .fetch();
-        
+
     }
 
+    @PersistenceUnit
+    EntityManagerFactory emf;
 
+    @Test
+    public void fetchJoinNo(){
+        em.flush();
+        em.clear();
+
+        Member findMember = jpaQueryFactory
+                .selectFrom(member)
+                .where(member.userName.eq("member1"))
+                .fetchOne();
+
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertThat(loaded).as("패치 조인 미적용").isFalse();
+
+    }
+
+    @Test
+    public void fetchJoinYes(){
+        em.flush();
+        em.clear();
+
+        Member findMember = jpaQueryFactory
+                .selectFrom(member)
+                .join(member.team, team).fetchJoin()
+                .where(member.userName.eq("member1"))
+                .fetchOne();
+
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertThat(loaded).as("패치 조인 적용").isTrue();
+
+    }
 }
