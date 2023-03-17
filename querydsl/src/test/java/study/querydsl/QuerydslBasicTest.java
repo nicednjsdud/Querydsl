@@ -1,6 +1,7 @@
 package study.querydsl;
 
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +57,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void startQuerydsl(){
+    public void startQuerydsl() {
 
         Member findMember = jpaQueryFactory
                 .select(member)
@@ -68,7 +69,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void search(){
+    public void search() {
         Member findMember = jpaQueryFactory
                 .selectFrom(member)
                 .where(member.userName.eq("member1")
@@ -78,7 +79,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void searchAndParam(){
+    public void searchAndParam() {
         Member findMember = jpaQueryFactory
                 .selectFrom(member)
                 .where(member.userName.eq("member1"),
@@ -89,7 +90,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void resultFetch(){
+    public void resultFetch() {
         List<Member> findMembers = jpaQueryFactory
                 .selectFrom(member)
                 .fetch();
@@ -116,9 +117,10 @@ public class QuerydslBasicTest {
      * 1. 회원 나이 내림차순(desc)
      * 2. 회원 이름 올림차순(asc)
      * 단 2에서 회원이름이 없으면 마지막에 출력 (nulls last)
-  름  */
+     * 름
+     */
     @Test
-    public void sort(){
+    public void sort() {
         em.persist(new Member(null, 100));
         em.persist(new Member("member5", 100));
         em.persist(new Member("member6", 100));
@@ -139,7 +141,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void paging1(){
+    public void paging1() {
         List<Member> result = jpaQueryFactory
                 .selectFrom(member)
                 .orderBy(member.userName.desc())
@@ -151,7 +153,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void paging2(){
+    public void paging2() {
         QueryResults<Member> queryResults = jpaQueryFactory
                 .selectFrom(member)
                 .orderBy(member.userName.desc())
@@ -163,5 +165,33 @@ public class QuerydslBasicTest {
         assertThat(queryResults.getLimit()).isEqualTo(2);
         assertThat(queryResults.getOffset()).isEqualTo(1);
         assertThat(queryResults.getResults().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void aggregation() {
+        List<Tuple> result = jpaQueryFactory
+                .select(
+                        member.count(),
+                        member.age.sum(),
+                        member.age.avg(),
+                        member.age.max(),
+                        member.age.min())
+                .from(member)
+                .fetch();
+
+        Tuple tuple = result.get(0);
+        assertThat(tuple.get(member.count())).isEqualTo(4);
+        assertThat(tuple.get(member.age.sum())).isEqualTo(100);
+        assertThat(tuple.get(member.age.avg())).isEqualTo(25);
+        assertThat(tuple.get(member.age.max())).isEqualTo(40);
+        assertThat(tuple.get(member.age.min())).isEqualTo(10);
+    }
+
+    /**
+     *  팀의 이름과 각 팀의 평균 연령을 구하라
+     */
+    @Test
+    public void group() {
+        
     }
 }
