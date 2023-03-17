@@ -449,4 +449,32 @@ public class QuerydslBasicTest {
             System.out.println(s);
         }
     }
+
+    @Test
+    public void simpleProjection(){
+        List<String> result = jpaQueryFactory
+                .select(member.userName)
+                .from(member)
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    @Test
+    public void tupleProjection(){
+        List<Tuple> result = jpaQueryFactory
+                .select(member.userName, member.age)
+                .from(member)
+                .fetch();
+
+        for (Tuple tuple : result) {
+            String userName = tuple.get(member.userName);
+            Integer age = tuple.get(member.age);
+            System.out.println("userName = " + userName);
+            System.out.println("age = " + age);
+        }
+
+    }
 }
