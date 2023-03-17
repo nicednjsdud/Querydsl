@@ -260,7 +260,23 @@ public class QuerydslBasicTest {
 
     }
 
-    
+    /**
+     * 연관관계가 없는 엔티티 외부 조인
+     * 회원의 이름이 팀이름과 같은 대상 외부 조인
+     */
+    @Test
+    public void join_on_no_relation(){
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        em.persist(new Member("teamC"));
+
+        List<Tuple> result = jpaQueryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(team).on(member.userName.eq(team.name))
+                .fetch();
+        
+    }
 
 
 }
