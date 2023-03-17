@@ -245,4 +245,22 @@ public class QuerydslBasicTest {
         assertThat(result).extracting("userName")
                 .containsExactly("teamA","teamB");
     }
+
+    /**
+     *  예) 회원과 팀을 조인하면서, 팀 이름이 teamA인 팀만 조인, 회원은 모두 조회
+     *  JPQL : select m, t from Member m left join m.team t on t.name = 'teamA'
+     */
+    @Test
+    public void join_on_filtering(){
+        List<Tuple> result = jpaQueryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(member.team, team).on(team.name.eq("teamA"))
+                .fetch();
+
+    }
+
+    
+
+
 }
