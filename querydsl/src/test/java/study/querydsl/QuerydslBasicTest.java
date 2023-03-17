@@ -3,6 +3,7 @@ package study.querydsl;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.assertj.core.api.Assertions;
@@ -20,6 +21,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 
+import java.beans.Expression;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -423,5 +425,28 @@ public class QuerydslBasicTest {
             System.out.println(s);
         }
 
+    }
+
+    @Test
+    public void constant() {
+        List<Tuple> a = jpaQueryFactory
+                .select(member.userName, Expressions.constant("A"))
+                .from(member)
+                .fetch();
+        for (Tuple tuple : a) {
+            System.out.println(a);
+        }
+    }
+
+    @Test
+    public void concat(){
+        List<String> member1 = jpaQueryFactory
+                .select(member.userName.concat("-").concat(member.age.stringValue()))
+                .from(member)
+                .where(member.userName.eq("member1"))
+                .fetch();
+        for (String s : member1) {
+            System.out.println(s);
+        }
     }
 }
