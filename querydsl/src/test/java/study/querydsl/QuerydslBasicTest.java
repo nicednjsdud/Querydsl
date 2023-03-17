@@ -109,6 +109,32 @@ public class QuerydslBasicTest {
         List<Member> findMembers2 = results.getResults();
         // 페이징에 사용
 
-        
+    }
+
+    /**
+     * 회원 정렬 순서
+     * 1. 회원 나이 내림차순(desc)
+     * 2. 회원 이름 올림차순(asc)
+     * 단 2에서 회원이름이 없으면 마지막에 출력 (nulls last)
+  름  */
+    @Test
+    public void sort(){
+        em.persist(new Member(null, 100));
+        em.persist(new Member("member5", 100));
+        em.persist(new Member("member6", 100));
+
+        List<Member> findMembers = jpaQueryFactory
+                .selectFrom(member)
+                .where(member.age.eq(100))
+                .orderBy(member.age.desc(), member.userName.asc().nullsLast())
+                .fetch();
+
+        Member member5 = findMembers.get(0);
+        Member member6 = findMembers.get(1);
+        Member nullMember = findMembers.get(2);
+
+        assertThat(member5.getUserName()).isEqualTo("member5");
+        assertThat(member6.getUserName()).isEqualTo("member6");
+        assertThat(nullMember.getUserName()).isNull();
     }
 }
