@@ -2,6 +2,7 @@ package study.querydsl;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.assertj.core.api.Assertions;
@@ -193,7 +194,7 @@ public class QuerydslBasicTest {
     }
 
     /**
-     *  팀의 이름과 각 팀의 평균 연령을 구하라
+     * 팀의 이름과 각 팀의 평균 연령을 구하라
      */
     @Test
     public void group() {
@@ -215,10 +216,10 @@ public class QuerydslBasicTest {
     }
 
     /**
-     *  팀 A에 소속된 모든 회원을 구하라
+     * 팀 A에 소속된 모든 회원을 구하라
      */
     @Test
-    public void join(){
+    public void join() {
         List<Member> findMembers = jpaQueryFactory
                 .selectFrom(member)
                 .join(member.team, team)
@@ -227,15 +228,15 @@ public class QuerydslBasicTest {
 
         assertThat(findMembers)
                 .extracting("userName")
-                .containsExactly("member1","member2");
+                .containsExactly("member1", "member2");
     }
 
     /**
-     *  세타 조인
-     *  회원의 이름이 팀 이름과 같은 회원 조회
+     * 세타 조인
+     * 회원의 이름이 팀 이름과 같은 회원 조회
      */
     @Test
-    public void theta_join(){
+    public void theta_join() {
         em.persist(new Member("teamA"));
         em.persist(new Member("teamB"));
 
@@ -246,15 +247,15 @@ public class QuerydslBasicTest {
                 .fetch();
 
         assertThat(result).extracting("userName")
-                .containsExactly("teamA","teamB");
+                .containsExactly("teamA", "teamB");
     }
 
     /**
-     *  예) 회원과 팀을 조인하면서, 팀 이름이 teamA인 팀만 조인, 회원은 모두 조회
-     *  JPQL : select m, t from Member m left join m.team t on t.name = 'teamA'
+     * 예) 회원과 팀을 조인하면서, 팀 이름이 teamA인 팀만 조인, 회원은 모두 조회
+     * JPQL : select m, t from Member m left join m.team t on t.name = 'teamA'
      */
     @Test
-    public void join_on_filtering(){
+    public void join_on_filtering() {
         List<Tuple> result = jpaQueryFactory
                 .select(member, team)
                 .from(member)
@@ -268,7 +269,7 @@ public class QuerydslBasicTest {
      * 회원의 이름이 팀이름과 같은 대상 외부 조인
      */
     @Test
-    public void join_on_no_relation(){
+    public void join_on_no_relation() {
         em.persist(new Member("teamA"));
         em.persist(new Member("teamB"));
         em.persist(new Member("teamC"));
@@ -285,7 +286,7 @@ public class QuerydslBasicTest {
     EntityManagerFactory emf;
 
     @Test
-    public void fetchJoinNo(){
+    public void fetchJoinNo() {
         em.flush();
         em.clear();
 
@@ -300,7 +301,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void fetchJoinYes(){
+    public void fetchJoinYes() {
         em.flush();
         em.clear();
 
@@ -319,7 +320,7 @@ public class QuerydslBasicTest {
      * 나이가 가장 많은 회원 조회
      */
     @Test
-    public void subQuery(){
+    public void subQuery() {
 
         QMember memberSub = new QMember("memberSub");
 
@@ -337,7 +338,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void subQueryGoe(){
+    public void subQueryGoe() {
 
         QMember memberSub = new QMember("memberSub");
 
@@ -351,11 +352,11 @@ public class QuerydslBasicTest {
                 .fetch();
 
         assertThat(result).extracting("age")
-                .containsExactly(30,40);
+                .containsExactly(30, 40);
     }
 
     @Test
-    public void subQueryIn(){
+    public void subQueryIn() {
 
         QMember memberSub = new QMember("memberSub");
 
@@ -370,11 +371,11 @@ public class QuerydslBasicTest {
                 .fetch();
 
         assertThat(result).extracting("age")
-                .containsExactly(20,30,40);
+                .containsExactly(20, 30, 40);
     }
 
     @Test
-    public void selectSubQuery(){
+    public void selectSubQuery() {
         QMember memberSub = new QMember("memberSub");
 
         List<Tuple> result = jpaQueryFactory
@@ -389,5 +390,38 @@ public class QuerydslBasicTest {
         for (Tuple tuple : result) {
             System.out.println(tuple);
         }
+    }
+
+    @Test
+    public void basicCase() {
+        List<String> result = jpaQueryFactory
+                .select(member.age
+                        .when(10).then("열살")
+                        .when(20).then("스무살")
+                        .otherwise("기타")
+                )
+                .from(member)
+                .fetch();
+
+        for (String s : result) {
+            System.out.println(s);
+        }
+    }
+
+    @Test
+    public void complexCase() {
+        List<String> list = jpaQueryFactory
+                .select(new CaseBuilder()
+                        .when(member.age.between(0, 20)).then("0~20살")
+                        .when(member.age.between(21, 30)).then("21~30살")
+                        .otherwise("기타")
+                )
+                .from(member)
+                .fetch();
+
+        for (String s : list) {
+            System.out.println(s);
+        }
+
     }
 }
