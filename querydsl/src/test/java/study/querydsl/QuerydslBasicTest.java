@@ -642,4 +642,48 @@ public class QuerydslBasicTest {
     private BooleanExpression allEq(String userNameCond,Integer ageCond){
         return userNameEq(userNameCond).and(ageEq(ageCond));
     }
+
+    @Test
+    public void bulkUpdate(){
+
+        // member 1 = 10 -> 비회원
+        // member 2 = 20 -> 비회원
+        // member 3 = 30 -> 유지
+        // member 4 = 40 -> 유지
+
+        long count = jpaQueryFactory
+                .update(member)
+                .set(member.userName, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+        em.flush();
+        em.clear();
+
+        List<Member> result = jpaQueryFactory
+                .selectFrom(member)
+                .fetch();
+
+        for (Member member1 : result) {
+            System.out.println("member1 = " + member1);
+        }
+        // 벌크연산을 하면 거의 무조건 flush 해줘라!
+        // 영속성 컨텍스트에 바뀌기전 내용이 남아있어서 디비에서 가져온 데이터를 덮어씀
+    }
+
+    @Test
+    public void bulkAdd(){
+        long count = jpaQueryFactory
+                .update(member)
+                .set(member.age, member.age.add(1))
+                .execute();
+
+    }
+
+    @Test
+    public void bulkDelete(){
+        long count = jpaQueryFactory
+                .delete(member)
+                .where(member.age.gt(18))
+                .execute();
+    }
 }
