@@ -22,7 +22,7 @@ public class MemberQueryRepository {
     public MemberQueryRepository(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
     }
-    
+
     public List<MemberTeamDto> search(MemberSearchCondition condition) {
         return queryFactory
                 .select(new QMemberTeamDto(
