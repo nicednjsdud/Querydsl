@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.dto.MemberSearchCondition;
 import study.querydsl.dto.MemberTeamDto;
 import study.querydsl.entity.Member;
+import study.querydsl.entity.QMember;
 import study.querydsl.entity.Team;
 
 import javax.persistence.EntityManager;
@@ -16,6 +17,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static study.querydsl.entity.QMember.*;
 
 @SpringBootTest
 @Transactional
@@ -28,8 +30,8 @@ class MemberRepositoryTest {
     EntityManager em;
 
     @Test
-    public void basicTest(){
-        Member member = new Member("member1",10);
+    public void basicTest() {
+        Member member = new Member("member1", 10);
         memberRepository.save(member);
 
         Member findMember = memberRepository.findById(member.getId()).get();
@@ -43,7 +45,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void searchTest(){
+    public void searchTest() {
         Team teamA = new Team("teamA");
         Team teamB = new Team("teamB");
         em.persist(teamA);
@@ -69,7 +71,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void searchPageSimple(){
+    public void searchPageSimple() {
         Team teamA = new Team("teamA");
         Team teamB = new Team("teamB");
         em.persist(teamA);
@@ -90,6 +92,14 @@ class MemberRepositoryTest {
         Page<MemberTeamDto> result = memberRepository.searchPageSimple(condition, pageRequest);
 
         assertThat(result.getSize()).isEqualTo(3);
-        assertThat(result.getContent()).extracting("userName").containsExactly("member1","member2","member3");
+        assertThat(result.getContent()).extracting("userName").containsExactly("member1", "member2", "member3");
+    }
+
+    @Test
+    public void querydslPredicateExecutorTest() {
+        Iterable<Member> findMember = memberRepository.findAll(member.age.between(20, 40).and(member.userName.eq("member1")));
+        for (Member member1 : findMember) {
+            System.out.println("member1 = " + member1);
+        }
     }
 }
