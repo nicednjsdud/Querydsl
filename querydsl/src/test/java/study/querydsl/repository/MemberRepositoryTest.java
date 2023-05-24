@@ -97,7 +97,8 @@ class MemberRepositoryTest {
 
     @Test
     public void querydslPredicateExecutorTest() {
-        Iterable<Member> findMember = memberRepository.findAll(member.age.between(20, 40).and(member.userName.eq("member1")));
+        Iterable<Member> findMember = memberRepository.findAll(member.age.between(10, 40)
+                .and(member.userName.eq("member1")));
         for (Member member1 : findMember) {
             System.out.println("member1 = " + member1);
         }
