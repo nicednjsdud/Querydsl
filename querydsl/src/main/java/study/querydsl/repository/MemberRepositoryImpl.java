@@ -24,16 +24,17 @@ import static study.querydsl.entity.QTeam.team;
 
 public class MemberRepositoryImpl extends QuerydslRepositorySupport implements MemberRepositoryCustom {
 
-    public MemberRepositoryImpl() {
+    private final JPAQueryFactory queryFactory;
+
+    public MemberRepositoryImpl(EntityManager em) {
         super(Member.class);
+        this.queryFactory = new JPAQueryFactory(em);
     }
 
-//    private final JPAQueryFactory queryFactory;
 //
 //    public MemberRepositoryImpl(EntityManager em) {
 //        this.queryFactory = new JPAQueryFactory(em);
 //    }
-
 
 
     @Override
@@ -87,8 +88,7 @@ public class MemberRepositoryImpl extends QuerydslRepositorySupport implements M
 
     }
 
-    @Override
-    public Page<MemberTeamDto> searchPageSimple2(MemberSearchCondition condition, Pageable pageable) {
+    public QueryResults<MemberTeamDto> searchPageSimple2(MemberSearchCondition condition, Pageable pageable) {
         JPQLQuery<MemberTeamDto> jpqlQuery = from(member)
                 .leftJoin(member.team, team)
                 .where(
@@ -143,7 +143,7 @@ public class MemberRepositoryImpl extends QuerydslRepositorySupport implements M
                         ageLoe(condition.getAgeLoe())
                 );
 
-        return PageableExecutionUtils.getPage(content,pageable, countQuery::fetchCount);
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
 //        return new PageImpl<>(content, pageable, total);
 
     }
