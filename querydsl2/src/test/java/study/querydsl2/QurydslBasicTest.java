@@ -1,11 +1,14 @@
 package study.querydsl2;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl2.entity.Member;
+import study.querydsl2.entity.QMember;
 import study.querydsl2.entity.Team;
 
 import javax.persistence.EntityManager;
@@ -16,6 +19,8 @@ public class QurydslBasicTest {
     
     @Autowired
     EntityManager em;
+
+    JPAQueryFactory queryFactory;
     
     @BeforeEach
     public void before(){
@@ -40,8 +45,22 @@ public class QurydslBasicTest {
     @Test
     public void startJPQL(){
         // member1을 찾아라.
-        Member findByJPQL = em.createQuery("select m from Member m where m.username = :username", Member.class)
+        Member findMember = em.createQuery("select m from Member m where m.username = :username", Member.class)
                 .setParameter("username", "member1")
                 .getSingleResult();
+        Assertions.assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void startQueryDsl(){
+        queryFactory = new JPAQueryFactory(em);
+        QMember m = new QMember("m");
+
+        Member findMember = queryFactory
+                .select(m)
+                .from(m)
+                .where(m.username.eq("member1"))
+                .fetchOne();
+        Assertions.assertThat(findMember.getUsername()).isEqualTo("member1");
     }
 }
