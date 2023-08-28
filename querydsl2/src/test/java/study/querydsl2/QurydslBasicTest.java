@@ -110,8 +110,11 @@ public class QurydslBasicTest {
                 .selectFrom(member)
                 .fetchResults();
 
-        results.getTotal();
-        List<Member> content = results.getResults();
-
+//        results.getTotal();
+//        List<Member> content = results.getResults();
+        long count = queryFactory
+                .selectFrom(member)
+                .fetchCount();
+        
     }
 }
